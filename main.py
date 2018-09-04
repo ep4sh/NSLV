@@ -58,6 +58,6 @@ mysql_conn()
 for (ip, bytes_in, bytes_out) in IP_LIST:
     if bytes_in > 1000:
         if not (ip.startswith("192.168.")):
-            #print(ip)
+            print(ip)
             print('Принято {}, передано {} байт: {}'.format(bytes_in,bytes_out, getHost(ip)))
             print()
