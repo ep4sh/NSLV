@@ -22,12 +22,12 @@ def mysql_conn(user=mysql_user,password=mysql_password,db=mysql_database,host=my
     cnx = mysql.connector.connect(user=user, password=password, database=db, host=host)
     cursor = cnx.cursor()
 
-    query = ("SELECT INET_NTOA(IP_DST_ADDR) as ip_dest from aggrflowsv4 where INET_NTOA(IP_SRC_ADDR)='"+ip_src+"' AND (L7_PROTO='178' or L7_PROTO='7') ;")
+    query = ("SELECT INET_NTOA(IP_DST_ADDR) as ip_dest, IN_BYTES as inBytes from flowsv4 where INET_NTOA(IP_SRC_ADDR)='"+ip_src+"' AND (L4_DST_PORT='443' or L4_DST_PORT='80') group by ip_dest;")
     cursor.execute(query)
+
 # Получаем данные.
-    for ipList in cursor.fetchall():
-        for ip in ipList:
-            ip_list.append(ip)
+    for x in cursor.fetchall():
+        ip_list.append(x)
     cnx.close()
 
 
@@ -47,8 +47,9 @@ def getHost(ip):
 # подключение к базе
 mysql_conn()
 
-# резолв хостов
-for ip in IP_LIST:
-    if not (ip.startswith("192.168.")):
-        getHost(ip)
 
+# резолв хостов
+for (ip, bytes_in) in IP_LIST:
+    if bytes_in > 1000:
+        if not (ip.startswith("192.168.")):
+           getHost(ip)
