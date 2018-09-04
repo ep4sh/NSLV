@@ -36,7 +36,9 @@ def getHost(ip):
     try:
         data = socket.gethostbyaddr(ip)
         host = repr(data[0])
-        print(host)
+        root = "".join(host.split(".")[-1]).replace('\'','')
+        tld = "".join(host.split(".")[-2])
+        print('{}.{}'.format(tld, root))
         return host
     except Exception:
         return False
