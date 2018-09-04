@@ -15,8 +15,12 @@ mysql_database='flow'
 mysql_host='192.168.1.178'
 
 # задаём ip, который хотим мониторить
-IP_SRC = '192.168.1.41'
+IP_SRC = '192.168.1.43'
+# списки для заполнения и
 IP_LIST = []
+DNS_NAMES = []
+bIN = []
+bOUT = []
 
 def mysql_conn(user=mysql_user,password=mysql_password,db=mysql_database,host=mysql_host, ip_src=IP_SRC, ip_list=IP_LIST):
     cnx = mysql.connector.connect(user=user, password=password, database=db, host=host)
@@ -37,27 +41,37 @@ def getHost(ip):
         data = socket.gethostbyaddr(ip)
         host = repr(data[0])
         root = "".join(host.split(".")[-1]).replace('\'','')
-        tld = "".join(host.split(".")[-2])
-        if (host.split(".")[-3]):
-           subdomain = "".join(host.split(".")[-3]).replace('\'','')
-           full = subdomain+"."+tld+"."+root
-        else:
-            full = tld + "." + root
+        tld = "".join(host.split(".")[-2]).replace('\'','')
+        full = tld + "." + root
         return full
     except Exception:
-        return "Cant resolve DNS name"
+        pass
+
+
+def setDNS(res,bytesin,bytesout):
+    if res not in DNS_NAMES.values():
+        DNS_NAMES['host'] = res
+        DNS_NAMES['bin'] = bytesin
+        DNS_NAMES['bout'] = bytesout
+    else:
+        DNS_NAMES['bin'] += bytesin
+        DNS_NAMES['bout'] += bytesout
 
 #****************************************************************************
 #****************************************************************************
+
 
 # подключение к базе
 mysql_conn()
-
 
 # резолв хостов
 for (ip, bytes_in, bytes_out) in IP_LIST:
     if bytes_in > 1000:
         if not (ip.startswith("192.168.")):
-            print(ip)
-            print('Принято {}, передано {} байт: {}'.format(bytes_in,bytes_out, getHost(ip)))
-            print()
+            DNS_NAMES.append(getHost(ip))
+            bIN.append(bytes_in)
+            bOUT.append(bytes_out)
+
+zipped = list(zip(DNS_NAMES,bIN,bOUT))
+for x in zipped:
+    if (x[0])
