@@ -15,14 +15,14 @@ mysql_database='flow'
 mysql_host='192.168.1.178'
 
 # задаём ip, который хотим мониторить
-IP_SRC = '192.168.1.43'
+IP_SRC = '192.168.1.41'
 IP_LIST = []
 
 def mysql_conn(user=mysql_user,password=mysql_password,db=mysql_database,host=mysql_host, ip_src=IP_SRC, ip_list=IP_LIST):
     cnx = mysql.connector.connect(user=user, password=password, database=db, host=host)
     cursor = cnx.cursor()
 
-    query = ("SELECT INET_NTOA(IP_DST_ADDR) as ip_dest, IN_BYTES as inBytes from flowsv4 where INET_NTOA(IP_SRC_ADDR)='"+ip_src+"' AND (L4_DST_PORT='443' or L4_DST_PORT='80') group by ip_dest;")
+    query = ("SELECT INET_NTOA(IP_DST_ADDR) as ip_dest, IN_BYTES as inBytes, OUT_BYTES as outBytes from flowsv4 where INET_NTOA(IP_SRC_ADDR)='"+ip_src+"' AND (L4_DST_PORT='443' or L4_DST_PORT='80') group by ip_dest;")
     cursor.execute(query)
 
 # Получаем данные.
@@ -38,10 +38,14 @@ def getHost(ip):
         host = repr(data[0])
         root = "".join(host.split(".")[-1]).replace('\'','')
         tld = "".join(host.split(".")[-2])
-        print('{}.{}'.format(tld, root))
-        return host
+        if (host.split(".")[-3]):
+           subdomain = "".join(host.split(".")[-3]).replace('\'','')
+           full = subdomain+"."+tld+"."+root
+        else:
+            full = tld + "." + root
+        return full
     except Exception:
-        return False
+        return "Cant resolve DNS name"
 
 #****************************************************************************
 #****************************************************************************
@@ -51,7 +55,9 @@ mysql_conn()
 
 
 # резолв хостов
-for (ip, bytes_in) in IP_LIST:
+for (ip, bytes_in, bytes_out) in IP_LIST:
     if bytes_in > 1000:
         if not (ip.startswith("192.168.")):
-           getHost(ip)
+            #print(ip)
+            print('Принято {}, передано {} байт: {}'.format(bytes_in,bytes_out, getHost(ip)))
+            print()
