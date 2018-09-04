@@ -1,6 +1,14 @@
+# NtopNG Simple netflowLog Viewer
+# by ep4sh
+# simple utility, that connect to mysql RDMS (https://www.ntop.org/guides/ntopng/advanced_features/flows_dump.html#mysql)
+# and gather ip-addr for L7 protocols: HTTP(code 7) and HTTPS (code 178)
+# and resolve them into DNS names
+#
+# Please, dont forget change your creds!
 import socket
 import mysql.connector
 
+# MySQL creds
 mysql_user='traffic_user'
 mysql_password='pass'
 mysql_database='flow'
