@@ -7,10 +7,9 @@ def getHost(ip):
     try:
         data = socket.gethostbyaddr(ip)
         host = repr(data[0])
-        return host
         print(host)
+        return host
     except Exception:
-        # fail gracefully
         return False
 
 def remFile(tmpfile):
@@ -20,4 +19,5 @@ def remFile(tmpfile):
         print("The file does not exist")
 
 with open(tempFile,"r") as tf:
-    print(tf.readlines())
+    line = "".join(tf.readlines()).split("\n")
+    print(line)
