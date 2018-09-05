@@ -13,7 +13,6 @@ mysql_user='traffic_user'
 mysql_password='pass'
 mysql_database='flow'
 mysql_host='192.168.1.178'
-
 # задаём ip, который хотим мониторить
 IP_SRC = '192.168.1.43'
 # списки для заполнения и
@@ -22,16 +21,21 @@ DNS_NAMES = []
 bIN = []
 bOUT = []
 UNIQ = []
-def mysql_conn(user=mysql_user,password=mysql_password,db=mysql_database,host=mysql_host, ip_src=IP_SRC, ip_list=IP_LIST):
+def mysql_conn(user=mysql_user,password=mysql_password,db=mysql_database,host=mysql_host, ip_src=IP_SRC, ip_list=IP_LIST, query=''):
     cnx = mysql.connector.connect(user=user, password=password, database=db, host=host)
     cursor = cnx.cursor()
-
     query = ("SELECT INET_NTOA(IP_DST_ADDR) as ip_dest, IN_BYTES as inBytes, OUT_BYTES as outBytes from flowsv4 where INET_NTOA(IP_SRC_ADDR)='"+ip_src+"' AND (L4_DST_PORT='443' or L4_DST_PORT='80') group by ip_dest;")
     cursor.execute(query)
-
 # Получаем данные.
     for x in cursor.fetchall():
         ip_list.append(x)
+    cnx.close()
+
+def mysql_conn2(fhost, finb, foutb):
+    cnx = mysql.connector.connect(user=mysql_user, password=mysql_password, database=mysql_database, host=mysql_host)
+    cursor = cnx.cursor()
+    query = "INSERT into dns (`id`,`dnsname`,`inbytes`,`outbytes`) VALUES(NULL, %s, %s, %s );"
+    cursor.execute(query, (fhost, finb, foutb))
     cnx.close()
 
 
@@ -48,15 +52,6 @@ def getHost(ip):
         pass
 
 
-def setDNS(res,bytesin,bytesout):
-    if res not in DNS_NAMES.values():
-        DNS_NAMES['host'] = res
-        DNS_NAMES['bin'] = bytesin
-        DNS_NAMES['bout'] = bytesout
-    else:
-        DNS_NAMES['bin'] += bytesin
-        DNS_NAMES['bout'] += bytesout
-
 #****************************************************************************
 #****************************************************************************
 
@@ -71,9 +66,21 @@ for (ip, bytes_in, bytes_out) in IP_LIST:
             DNS_NAMES.append(getHost(ip))
             bIN.append(bytes_in)
             bOUT.append(bytes_out)
-
-
+# создание зипа
 zipped = list(zip(DNS_NAMES,bIN,bOUT))
-
+# удаление из зипа значений NONE:
 zipped = [x for x in zipped if x[0] is not None]
+
+for item in zipped:
+    host = str(item[0])
+    inb = str(item[1])
+    outb = str(item[2])
+    print(host,inb, outb)
+    mysql_conn2(host,inb,outb)
+
+
+print()
+print()
+print()
+
 
