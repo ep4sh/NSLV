@@ -21,7 +21,7 @@ IP_LIST = []
 DNS_NAMES = []
 bIN = []
 bOUT = []
-
+UNIQ = []
 def mysql_conn(user=mysql_user,password=mysql_password,db=mysql_database,host=mysql_host, ip_src=IP_SRC, ip_list=IP_LIST):
     cnx = mysql.connector.connect(user=user, password=password, database=db, host=host)
     cursor = cnx.cursor()
@@ -72,6 +72,8 @@ for (ip, bytes_in, bytes_out) in IP_LIST:
             bIN.append(bytes_in)
             bOUT.append(bytes_out)
 
+
 zipped = list(zip(DNS_NAMES,bIN,bOUT))
-for x in zipped:
-    if (x[0])
+
+zipped = [x for x in zipped if x[0] is not None]
+
