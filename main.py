@@ -15,7 +15,7 @@ mysql_password='pass'
 mysql_database='flow'
 mysql_host='192.168.1.178'
 # задаём ip, который хотим мониторить
-if sys.argv[1] is NULL:
+if sys.argv[1] is None:
     IP_SRC = '192.168.1.43'
 else
     IP_SRC = sys.argv[1]
