@@ -17,7 +17,7 @@ mysql_host='192.168.1.178'
 # задаём ip, который хотим мониторить
 if sys.argv[1] is NULL:
     IP_SRC = '192.168.1.43'
-    else
+else
     IP_SRC = sys.argv[1]
 
 def mysql_conn(user=mysql_user,password=mysql_password,db=mysql_database,host=mysql_host, ip_src=IP_SRC):
