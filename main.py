@@ -5,6 +5,9 @@
 # and resolve them into DNS names
 #
 # Please, dont forget change your creds!
+#
+#
+#
 import socket
 import mysql.connector
 import sys
@@ -14,18 +17,23 @@ mysql_user='traffic_user'
 mysql_password='pass'
 mysql_database='flow'
 mysql_host='192.168.1.178'
+IP_SRC = ''
 # задаём ip, который хотим мониторить
-if sys.argv[1] is None:
-    IP_SRC = '192.168.1.43'
-else
-    IP_SRC = sys.argv[1]
+try:
+    if len(sys.argv) == 2:
+        IP_SRC = sys.argv[1]
+    else:
+        IP_SRC = '192.168.1.41'
+except:
+    pass
 
 def mysql_conn(user=mysql_user,password=mysql_password,db=mysql_database,host=mysql_host, ip_src=IP_SRC):
     cnx = mysql.connector.connect(user=user, password=password, database=db, host=host)
     cursor = cnx.cursor()
-    query = ("SELECT idx, INET_NTOA(IP_DST_ADDR) as ip_dest from flowsv4 where INET_NTOA(IP_SRC_ADDR)='"+ip_src+"' AND (L4_DST_PORT='443' or L4_DST_PORT='80') AND IN_BYTES > 1000 AND dns <> 'NULL' group by ip_dest;")
+    query = ("SELECT idx, INET_NTOA(IP_DST_ADDR) as ip_dest from flowsv4 where INET_NTOA(IP_SRC_ADDR)='"+ip_src+"' AND (L4_DST_PORT='443' or L4_DST_PORT='80') AND IN_BYTES > 1000 group by ip_dest;")
     cursor.execute(query)
 # Получаем данные.
+
     for x in cursor.fetchall():
         id = x[0]
         dnsName = getHost(x[1])
@@ -36,6 +44,7 @@ def mysql_conn(user=mysql_user,password=mysql_password,db=mysql_database,host=my
             )
             data = (dnsName,id)
             cursor.execute(insert_stmt, data)
+            print(data)
     cnx.commit()
     cnx.close()
 
