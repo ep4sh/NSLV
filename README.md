@@ -8,8 +8,11 @@ Then it puts data into `dns` COLUMN in the same table (you should create it by m
 alter table flowsv4 add column dns varchar(100);
 ```
 
-For frontend i use `flow.php` script:  
+For **backend** i use`flow2.php`: it  generates JSON data.  
+For **frontend** i use `index.html`: it  outputs JSON with [DataTables](https://datatables.net/) with [Bootstrap4](https://getbootstrap.com/) ):    
+
 ![NSLV](NSLV.jpg)
+
 
 ### Please, dont forget change your creds!
 
